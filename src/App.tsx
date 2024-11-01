@@ -27,12 +27,14 @@ function App() {
       setShakeCount((prevCount) => prevCount + 1);
     }
 
-    requestAnimationFrame(() => {
-      setMotion({
-        xAcceleration: x,
-        yAcceleration: y,
+    if (Math.round(x) !== Math.round(motion.xAcceleration) || Math.round(y) !== Math.round(motion.yAcceleration)) {
+      requestAnimationFrame(() => {
+        setMotion({
+          xAcceleration: x,
+          yAcceleration: y,
+        });
       });
-    });
+    }
   };
 
   const requestPermission = async () => {
