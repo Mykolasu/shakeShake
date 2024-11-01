@@ -28,10 +28,13 @@ function App() {
     }
 
     requestAnimationFrame(() => {
-      setMotion({
-        xAcceleration: x,
-        yAcceleration: y,
-      });
+      // Условие для ограничения частоты обновлений
+      if (Math.abs(x - motion.xAcceleration) > 1 || Math.abs(y - motion.yAcceleration) > 1) {
+        setMotion({
+          xAcceleration: x,
+          yAcceleration: y,
+        });
+      }
     });
   };
 
@@ -54,9 +57,9 @@ function App() {
   };
 
   useEffect(() => {
-    const rotateX = (motion.yAcceleration * 5).toFixed(2);
-    const rotateY = (-motion.xAcceleration * 5).toFixed(2);
-    setTransformStyle(`perspective(1000px) rotateX(${rotateX} deg) rotateY(${rotateY} deg)`);
+    const rotateX = (motion.yAcceleration / 5).toFixed(2);
+    const rotateY = (-motion.xAcceleration / 5).toFixed(2);
+    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
   }, [motion]);
 
   return (
