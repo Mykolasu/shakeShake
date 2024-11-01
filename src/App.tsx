@@ -8,6 +8,7 @@ function App() {
   const shakesToAdd = 1;
 
   useEffect(() => {
+    // Handle device motion event
     const handleMotionEvent = (event: DeviceMotionEvent) => {
       const x = event.accelerationIncludingGravity?.x || 0;
       const y = event.accelerationIncludingGravity?.y || 0;
@@ -29,12 +30,12 @@ function App() {
       setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
     };
 
-    // Add device motion event listener
-    window.addEventListener("devicemotion", handleMotionEvent, true);
+    // Set the ondevicemotion event handler directly
+    window.ondevicemotion = handleMotionEvent;
 
-    // Cleanup event listener on component unmount
+    // Cleanup function to remove event handler on component unmount
     return () => {
-      window.removeEventListener("devicemotion", handleMotionEvent);
+      window.ondevicemotion = null;
     };
   }, []);
 
