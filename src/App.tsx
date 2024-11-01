@@ -27,14 +27,12 @@ function App() {
       setShakeCount((prevCount) => prevCount + 1);
     }
 
-    if (Math.round(x) !== Math.round(motion.xAcceleration) || Math.round(y) !== Math.round(motion.yAcceleration)) {
-      requestAnimationFrame(() => {
-        setMotion({
-          xAcceleration: x,
-          yAcceleration: y,
-        });
+    requestAnimationFrame(() => {
+      setMotion({
+        xAcceleration: x,
+        yAcceleration: y,
       });
-    }
+    });
   };
 
   const requestPermission = async () => {
@@ -58,7 +56,7 @@ function App() {
   useEffect(() => {
     const rotateX = (motion.yAcceleration).toFixed(2);
     const rotateY = (-motion.xAcceleration).toFixed(2);
-    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+    setTransformStyle(`perspective(1000px) rotateX(${Number(rotateX)>0 ? 50 : -50}deg) rotateY(${Number(rotateY)>0 ? 50 : -50}deg)`);
   }, [motion]);
 
   return (
