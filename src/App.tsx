@@ -54,9 +54,9 @@ function App() {
   };
 
   useEffect(() => {
-    const rotateX = (motion.yAcceleration ).toFixed(2);
-    const rotateY = (-motion.xAcceleration ).toFixed(2);
-    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+    const rotateX = (motion.yAcceleration * 5).toFixed(2);
+    const rotateY = (-motion.xAcceleration * 5).toFixed(2);
+    setTransformStyle(`perspective(1000px) rotateX(${rotateX} deg) rotateY(${rotateY} deg)`);
   }, [motion]);
 
   return (
