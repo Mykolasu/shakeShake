@@ -12,25 +12,28 @@ function App() {
 
   useEffect(() => {
     // Check for accelerometer errors
-    if (sensor.error) {
+    if (sensor && sensor.error) {
       console.error("Accelerometer is not supported on this device.");
       return;
     }
 
-    const { x, y, z } = sensor;
+    if (sensor) {
+      const { x, y, z } = sensor;
 
-    if (x !== null && y !== null && z !== null) {
-      const deltaX = Math.abs(x);
-      const deltaY = Math.abs(y);
-      const deltaZ = Math.abs(z);
+      if (x !== null && y !== null && z !== null) {
+        const deltaX = Math.abs(x);
+        const deltaY = Math.abs(y);
+        const deltaZ = Math.abs(z);
 
-      if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
-        setShakeCount((prevCount) => prevCount + shakesToAdd);
+        // A shake is detected when there's a sharp change on any axis
+        if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
+          setShakeCount((prevCount) => prevCount + shakesToAdd);
+        }
+
+        const rotateX = (y / 10).toFixed(2);
+        const rotateY = (-x / 10).toFixed(2);
+        setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
       }
-
-      const rotateX = (y / 10).toFixed(2);
-      const rotateY = (-x / 10).toFixed(2);
-      setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
     }
   }, [sensor]);
 
@@ -67,7 +70,7 @@ function App() {
           </div>
         </div>
 
-        {sensor.error && <p className="text-red-500">No Accelerometer, sorry.</p>}
+        {sensor && sensor.error && <p className="text-red-500">No Accelerometer, sorry.</p>}
       </div>
     </div>
   );
