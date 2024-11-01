@@ -8,14 +8,19 @@ function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const shakeThreshold = 15;
 
-  const [motion, setMotion] = useState<{ xAcceleration: number; yAcceleration: number }>({
+  const [motion, setMotion] = useState<{
+    xAcceleration: number;
+    yAcceleration: number;
+  }>({
     xAcceleration: 0,
     yAcceleration: 0,
   });
 
   const handleMotionEvent = (event: DeviceMotionEvent) => {
     if (!event.accelerationIncludingGravity) {
-      setErrorMessage("Device accelerometer is not supported or not accessible.");
+      setErrorMessage(
+        "Device accelerometer is not supported or not accessible."
+      );
       return;
     }
 
@@ -23,25 +28,33 @@ function App() {
     const y = event.accelerationIncludingGravity.y ?? 0;
     const z = event.accelerationIncludingGravity.z ?? 0;
 
-    if (Math.abs(x) > shakeThreshold || Math.abs(y) > shakeThreshold || Math.abs(z) > shakeThreshold) {
+    if (
+      Math.abs(x) > shakeThreshold ||
+      Math.abs(y) > shakeThreshold ||
+      Math.abs(z) > shakeThreshold
+    ) {
       setShakeCount((prevCount) => prevCount + 1);
     }
 
-    requestAnimationFrame(() => {
-      // Условие для ограничения частоты обновлений
-      if (Math.abs(x - motion.xAcceleration) > 1 || Math.abs(y - motion.yAcceleration) > 1) {
-        requestAnimationFrame(() => {
-          setMotion({
-            xAcceleration: x,
-            yAcceleration: y,
-          });
+    // Условие для ограничения частоты обновлений
+    if (
+      Math.abs(x - motion.xAcceleration) > 1 ||
+      Math.abs(y - motion.yAcceleration) > 1
+    ) {
+      requestAnimationFrame(() => {
+        setMotion({
+          xAcceleration: x,
+          yAcceleration: y,
         });
-      }
-    });
+      });
+    }
   };
 
   const requestPermission = async () => {
-    if ("DeviceMotionEvent" in window && typeof (DeviceMotionEvent as any).requestPermission === "function") {
+    if (
+      "DeviceMotionEvent" in window &&
+      typeof (DeviceMotionEvent as any).requestPermission === "function"
+    ) {
       try {
         const response = await (DeviceMotionEvent as any).requestPermission();
         if (response === "granted") {
@@ -50,7 +63,9 @@ function App() {
           setErrorMessage("Access to accelerometer was denied by user.");
         }
       } catch (error) {
-        setErrorMessage(`Error while requesting accelerometer access: ${error}`);
+        setErrorMessage(
+          `Error while requesting accelerometer access: ${error}`
+        );
       }
     } else {
       // Якщо requestPermission не підтримується
@@ -61,14 +76,16 @@ function App() {
   useEffect(() => {
     const rotateX = (motion.yAcceleration / 5).toFixed(2);
     const rotateY = (-motion.xAcceleration / 5).toFixed(2);
-    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+    setTransformStyle(
+      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+    );
   }, [motion]);
 
   return (
     <div className="bg-black flex justify-center">
       <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
-        <button 
-          onClick={requestPermission} 
+        <button
+          onClick={requestPermission}
           className="m-4 p-2 bg-blue-500 text-white rounded"
         >
           Enable Motion Detection
@@ -103,9 +120,7 @@ function App() {
           </div>
         </div>
 
-        {errorMessage && (
-          <p className="text-red-500">{errorMessage}</p>
-        )}
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       </div>
     </div>
   );
