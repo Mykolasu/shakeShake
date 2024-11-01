@@ -13,65 +13,45 @@ function App() {
     yAcceleration: 0,
   });
 
-  useEffect(() => {
-    let lastUpdate = 0; // Время последнего обновления
+  const handleMotionEvent = (event: DeviceMotionEvent) => {
+    if (!event.accelerationIncludingGravity) {
+      setErrorMessage("Device accelerometer is not supported or not accessible.");
+      return;
+    }
 
-    const handleMotionEvent = (event: DeviceMotionEvent) => {
-      if (!event.accelerationIncludingGravity) {
-        setErrorMessage("Device accelerometer is not supported or not accessible.");
-        return;
-      }
+    const x = event.accelerationIncludingGravity.x ?? 0;
+    const y = event.accelerationIncludingGravity.y ?? 0;
+    const z = event.accelerationIncludingGravity.z ?? 0;
 
-      const currentTime = Date.now(); // Текущее время
-      const deltaTime = currentTime - lastUpdate; // Разница во времени
+    if (Math.abs(x) > shakeThreshold || Math.abs(y) > shakeThreshold || Math.abs(z) > shakeThreshold) {
+      setShakeCount((prevCount) => prevCount + 1);
+    }
 
-      // Обновляем состояние только если прошло больше 100ms
-      if (deltaTime > 100) {
-        lastUpdate = currentTime;
+    requestAnimationFrame(() => {
+      setMotion({
+        xAcceleration: x,
+        yAcceleration: y,
+      });
+    });
+  };
 
-        const x = event.accelerationIncludingGravity.x ?? 0;
-        const y = event.accelerationIncludingGravity.y ?? 0;
-        const z = event.accelerationIncludingGravity.z ?? 0;
-
-        // Увеличиваем счетчик тряски, если превышен порог
-        if (Math.abs(x) > shakeThreshold || Math.abs(y) > shakeThreshold || Math.abs(z) > shakeThreshold) {
-          setShakeCount((prevCount) => prevCount + 1);
+  const requestPermission = async () => {
+    if ("DeviceMotionEvent" in window && typeof (DeviceMotionEvent as any).requestPermission === "function") {
+      try {
+        const response = await (DeviceMotionEvent as any).requestPermission();
+        if (response === "granted") {
+          window.addEventListener("devicemotion", handleMotionEvent, true);
+        } else {
+          setErrorMessage("Access to accelerometer was denied by user.");
         }
-
-        requestAnimationFrame(() => {
-          setMotion({
-            xAcceleration: x,
-            yAcceleration: y,
-          });
-        });
+      } catch (error) {
+        setErrorMessage(`Error while requesting accelerometer access: ${error}`);
       }
-    };
-
-    const requestPermission = async () => {
-      if ("DeviceMotionEvent" in window && typeof (DeviceMotionEvent as any).requestPermission === "function") {
-        try {
-          const response = await (DeviceMotionEvent as any).requestPermission();
-          if (response === "granted") {
-            window.addEventListener("devicemotion", handleMotionEvent, true);
-          } else {
-            setErrorMessage("Access to accelerometer was denied by user.");
-          }
-        } catch (error) {
-          setErrorMessage(`Error while requesting accelerometer access: ${error}`);
-        }
-      } else {
-        // Если requestPermission не поддерживается
-        window.addEventListener("devicemotion", handleMotionEvent, true);
-      }
-    };
-
-    // Запрашиваем доступ к акселерометру при первом рендере
-    requestPermission();
-
-    return () => {
-      window.removeEventListener("devicemotion", handleMotionEvent);
-    };
-  }, []);
+    } else {
+      // Якщо requestPermission не підтримується
+      window.addEventListener("devicemotion", handleMotionEvent, true);
+    }
+  };
 
   useEffect(() => {
     const rotateX = (motion.yAcceleration).toFixed(2);
@@ -82,6 +62,13 @@ function App() {
   return (
     <div className="bg-black flex justify-center">
       <div className="w-full bg-black text-white h-screen font-bold flex flex-col max-w-xl">
+        <button 
+          onClick={requestPermission} 
+          className="m-4 p-2 bg-blue-500 text-white rounded"
+        >
+          Enable Motion Detection
+        </button>
+
         <div className="top-glow flex-grow mt-4 bg-[#f3ba2f] rounded-t-[48px] relative top-glow z-0">
           <div className="absolute top-1 left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
             <div className="px-4 mt-4 flex justify-center">
@@ -89,6 +76,7 @@ function App() {
                 <img src={dollarCoin} alt="Dollar Coin" className="w-10 h-10" />
                 <p className="text-4xl text-white">
                   {shakeCount.toLocaleString("en-EN")}
+                  {transformStyle}
                 </p>
               </div>
             </div>
