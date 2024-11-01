@@ -1,41 +1,42 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import { dollarCoin, mainCharacter } from "./images";
-import useAccelerometer from "react-hook-accelerometer";
 
 function App() {
   const [shakeCount, setShakeCount] = useState<number>(0);
   const [transformStyle, setTransformStyle] = useState<string>("");
   const shakesToAdd = 1;
 
-  const sensor = useAccelerometer({ frequency: 60 });
-
   useEffect(() => {
-    // Check for accelerometer errors
-    if (sensor && sensor.error) {
-      console.error("Accelerometer is not supported on this device.");
-      return;
-    }
+    const handleMotionEvent = (event: DeviceMotionEvent) => {
+      const x = event.accelerationIncludingGravity?.x || 0;
+      const y = event.accelerationIncludingGravity?.y || 0;
+      const z = event.accelerationIncludingGravity?.z || 0;
 
-    if (sensor) {
-      const { x, y, z } = sensor;
+      // Calculate absolute values to detect strong movement
+      const deltaX = Math.abs(x);
+      const deltaY = Math.abs(y);
+      const deltaZ = Math.abs(z);
 
-      if (x !== null && y !== null && z !== null) {
-        const deltaX = Math.abs(x);
-        const deltaY = Math.abs(y);
-        const deltaZ = Math.abs(z);
-
-        // A shake is detected when there's a sharp change on any axis
-        if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
-          setShakeCount((prevCount) => prevCount + shakesToAdd);
-        }
-
-        const rotateX = (y / 10).toFixed(2);
-        const rotateY = (-x / 10).toFixed(2);
-        setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+      // Detect shake if acceleration on any axis exceeds threshold
+      if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
+        setShakeCount((prevCount) => prevCount + shakesToAdd);
       }
-    }
-  }, [sensor]);
+
+      // Apply rotation transformation based on accelerometer data
+      const rotateX = (y / 10).toFixed(2);
+      const rotateY = (-x / 10).toFixed(2);
+      setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+    };
+
+    // Add device motion event listener
+    window.addEventListener("devicemotion", handleMotionEvent, true);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("devicemotion", handleMotionEvent);
+    };
+  }, []);
 
   return (
     <div className="bg-black flex justify-center">
@@ -70,7 +71,9 @@ function App() {
           </div>
         </div>
 
-        {sensor && sensor.error && <p className="text-red-500">No Accelerometer, sorry.</p>}
+        <p className="text-red-500">
+          {typeof DeviceMotionEvent === "undefined" && "No Accelerometer, sorry."}
+        </p>
       </div>
     </div>
   );
