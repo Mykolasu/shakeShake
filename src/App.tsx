@@ -30,9 +30,11 @@ function App() {
     requestAnimationFrame(() => {
       // Условие для ограничения частоты обновлений
       if (Math.abs(x - motion.xAcceleration) > 1 || Math.abs(y - motion.yAcceleration) > 1) {
-        setMotion({
-          xAcceleration: x,
-          yAcceleration: y,
+        requestAnimationFrame(() => {
+          setMotion({
+            xAcceleration: x,
+            yAcceleration: y,
+          });
         });
       }
     });
