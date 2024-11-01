@@ -2,34 +2,43 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { dollarCoin, mainCharacter } from "./images";
 
-// Определение типа для Accelerometer, если оно отсутствует
-declare global {
-  interface Window {
-    Accelerometer?: any;
-  }
+// Определение типа Accelerometer, если TypeScript не знает о его существовании
+interface Accelerometer {
+  x: number;
+  y: number;
+  z: number;
+  start: () => void;
+  addEventListener: (
+    event: "reading",
+    listener: () => void
+  ) => void;
 }
 
 function App() {
-  const [shakeCount, setShakeCount] = useState(0);
+  const [shakeCount, setShakeCount] = useState<number>(0);
   const [transformStyle, setTransformStyle] = useState<string>("");
   const shakesToAdd = 1;
 
   // Инициализация акселерометра
   const accelerometer = () => {
-    if (!("Accelerometer" in window)) {
+    // Проверка, если API акселерометра не поддерживается
+    if (typeof (window as any).Accelerometer === "undefined") {
       console.error("Акселерометр не поддерживается на этом устройстве.");
       return;
     }
 
     try {
-      const accelerometer = new window.Accelerometer({ frequency: 60 });
-      // Устанавливаем начальные значения, чтобы избежать `undefined`
-      let lastX = 0;
-      let lastY = 0;
-      let lastZ = 0;
+      const accelerometer = new (window as any).Accelerometer({
+        frequency: 60,
+      }) as Accelerometer;
+      let lastX: number = 0;
+      let lastY: number = 0;
+      let lastZ: number = 0;
 
       accelerometer.addEventListener("reading", () => {
-        const { x, y, z } = accelerometer;
+        const x = accelerometer.x ?? 0;
+        const y = accelerometer.y ?? 0;
+        const z = accelerometer.z ?? 0;
 
         const deltaX = Math.abs(x - lastX);
         const deltaY = Math.abs(y - lastY);
@@ -43,7 +52,9 @@ function App() {
         // Применение трансформации на основе данных акселерометра
         const rotateX = (y / 10).toFixed(2);
         const rotateY = (-x / 10).toFixed(2);
-        setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
+        setTransformStyle(
+          `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+        );
 
         // Обновляем значения для следующего расчета
         lastX = x;
