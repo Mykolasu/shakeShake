@@ -73,8 +73,8 @@ function App() {
           <div className="absolute top-1 left-0 right-0 bottom-0 bg-[#1d2025] rounded-t-[46px]">
             <div className="px-4 mt-4 flex justify-center">
               <div className="px-4 py-2 flex items-center space-x-2">
-                <img src={dollarCoin} alt="Dollar Coin" className="w-10 h-10" />
-                <p className="text-4xl text-white">
+                <img src={dollarCoin} alt="Dollar Coin" className="w-20 h-20" />
+                <p className="text-8xl text-white">
                   {shakeCount.toLocaleString("en-EN")}
                 </p>
               </div>
