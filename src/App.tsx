@@ -56,7 +56,7 @@ function App() {
   useEffect(() => {
     const rotateX = (motion.yAcceleration).toFixed(2);
     const rotateY = (-motion.xAcceleration).toFixed(2);
-    setTransformStyle(`perspective(1000px) rotateX(${Number(rotateX)>0 ? 50 : -50}deg) rotateY(${Number(rotateY)>0 ? 50 : -50}deg)`);
+    setTransformStyle(`perspective(1000px) rotateX(${Number(rotateX)>0 ? 25 : -25}deg) rotateY(${Number(rotateY)>0 ? 25 : -25}deg)`);
   }, [motion]);
 
   return (
@@ -76,7 +76,6 @@ function App() {
                 <img src={dollarCoin} alt="Dollar Coin" className="w-10 h-10" />
                 <p className="text-4xl text-white">
                   {shakeCount.toLocaleString("en-EN")}
-                  {transformStyle}
                 </p>
               </div>
             </div>
