@@ -1,76 +1,41 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import { dollarCoin, mainCharacter } from "./images";
-
-// Определение типа Accelerometer, если TypeScript не знает о его существовании
-interface Accelerometer {
-  x: number;
-  y: number;
-  z: number;
-  start: () => void;
-  addEventListener: (
-    event: "reading",
-    listener: () => void
-  ) => void;
-}
+import useAccelerometer from "react-hook-accelerometer";
 
 function App() {
   const [shakeCount, setShakeCount] = useState<number>(0);
   const [transformStyle, setTransformStyle] = useState<string>("");
   const shakesToAdd = 1;
 
-  // Инициализация акселерометра
-  const accelerometer = () => {
-    // Проверка, если API акселерометра не поддерживается
-    if (typeof (window as any).Accelerometer === "undefined") {
+  const sensor = useAccelerometer({ frequency: 60 });
+
+  useEffect(() => {
+    // Проверка на ошибки акселерометра
+    if (sensor.error) {
       console.error("Акселерометр не поддерживается на этом устройстве.");
       return;
     }
 
-    try {
-      const accelerometer = new (window as any).Accelerometer({
-        frequency: 60,
-      }) as Accelerometer;
-      let lastX: number = 0;
-      let lastY: number = 0;
-      let lastZ: number = 0;
+    // Проверка на резкие изменения в значениях акселерометра
+    const { x, y, z } = sensor;
 
-      accelerometer.addEventListener("reading", () => {
-        const x = accelerometer.x ?? 0;
-        const y = accelerometer.y ?? 0;
-        const z = accelerometer.z ?? 0;
+    if (x !== null && y !== null && z !== null) {
+      const deltaX = Math.abs(x);
+      const deltaY = Math.abs(y);
+      const deltaZ = Math.abs(z);
 
-        const deltaX = Math.abs(x - lastX);
-        const deltaY = Math.abs(y - lastY);
-        const deltaZ = Math.abs(z - lastZ);
+      // Встряхивание происходит при резком изменении на одной из осей
+      if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
+        setShakeCount((prevCount) => prevCount + shakesToAdd);
+      }
 
-        // Встряхивание происходит при резком изменении на одной из осей
-        if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
-          setShakeCount((prevCount) => prevCount + shakesToAdd);
-        }
-
-        // Применение трансформации на основе данных акселерометра
-        const rotateX = (y / 10).toFixed(2);
-        const rotateY = (-x / 10).toFixed(2);
-        setTransformStyle(
-          `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
-        );
-
-        // Обновляем значения для следующего расчета
-        lastX = x;
-        lastY = y;
-        lastZ = z;
-      });
-
-      accelerometer.start();
-    } catch (error) {
-      console.error("Не удалось получить доступ к акселерометру:", error);
+      // Применение трансформации на основе данных акселерометра
+      const rotateX = (y / 10).toFixed(2);
+      const rotateY = (-x / 10).toFixed(2);
+      setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
     }
-  };
-
-  useEffect(() => {
-    accelerometer();
-  }, []);
+  }, [sensor]);
 
   return (
     <div className="bg-black flex justify-center">
@@ -104,6 +69,8 @@ function App() {
             </div>
           </div>
         </div>
+
+        {sensor.error && <p className="text-red-500">No Accelerometer, sorry.</p>}
       </div>
     </div>
   );
