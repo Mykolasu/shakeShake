@@ -11,13 +11,12 @@ function App() {
   const sensor = useAccelerometer({ frequency: 60 });
 
   useEffect(() => {
-    // Проверка на ошибки акселерометра
+    // Check for accelerometer errors
     if (sensor.error) {
-      console.error("Акселерометр не поддерживается на этом устройстве.");
+      console.error("Accelerometer is not supported on this device.");
       return;
     }
 
-    // Проверка на резкие изменения в значениях акселерометра
     const { x, y, z } = sensor;
 
     if (x !== null && y !== null && z !== null) {
@@ -25,12 +24,10 @@ function App() {
       const deltaY = Math.abs(y);
       const deltaZ = Math.abs(z);
 
-      // Встряхивание происходит при резком изменении на одной из осей
       if (deltaX > 15 || deltaY > 15 || deltaZ > 15) {
         setShakeCount((prevCount) => prevCount + shakesToAdd);
       }
 
-      // Применение трансформации на основе данных акселерометра
       const rotateX = (y / 10).toFixed(2);
       const rotateY = (-x / 10).toFixed(2);
       setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
