@@ -1,10 +1,9 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { dollarCoin, mainCharacter } from "./images";
 
 function App() {
   const [shakeCount, setShakeCount] = useState<number>(0);
-  const [transformStyle, setTransformStyle] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const shakeThreshold = 15;
 
@@ -53,11 +52,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    const rotateX = (motion.yAcceleration).toFixed(2);
-    const rotateY = (-motion.xAcceleration).toFixed(2);
-    setTransformStyle(`perspective(1000px) rotateX(${Number(rotateX)>0 ? 25 : -25}deg) rotateY(${Number(rotateY)>0 ? 25 : -25}deg)`);
-  }, [motion]);
+  const transformStyle = `perspective(1000px) rotateX(${motion.yAcceleration > 0 ? 25 : -25}deg) rotateY(${motion.xAcceleration > 0 ? 25 : -25}deg)`;
 
   return (
     <div className="bg-black flex justify-center">
